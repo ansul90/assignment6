@@ -112,7 +112,7 @@ def mcp_tools_for_decision(mcp_tools: list) -> list[dict]:
 
 # ── final answer synthesis ────────────────────────────────────────────────────
 
-_ERROR_PREFIXES = ("[Decision error]", "[ERROR]", "[Error")
+_ERROR_PREFIXES = ("[Decision error]", "[ERROR]", "[Error", "[SKIP]")
 
 
 def _is_error_answer(text: str | None) -> bool:
@@ -154,7 +154,10 @@ async def run(query: str) -> str:
 
     # Durable memory: classify the user's query so facts/preferences
     # in it survive into future runs.
-    memory.remember(query, source="user_query", run_id=run_id)
+    mem_item = memory.remember(query, source="user_query", run_id=run_id)
+    kw_preview = json.dumps(mem_item.keywords[:8])
+    print(f"{_label('memory.remember')} classified \"{mem_item.descriptor[:100]}\" as {mem_item.kind}")
+    print(f"{_indent()}keywords: {kw_preview}")
 
     async with mcp_session() as session:
         mcp_tools = await load_tools(session)
@@ -166,6 +169,10 @@ async def run(query: str) -> str:
             # ── memory ────────────────────────────────────────────────────────
             hits = memory.read(query, history)
             print(f"{_label('memory.read')}{len(hits)} hit{'s' if len(hits) != 1 else ''}")
+            for h in hits:
+                if h.kind in ("fact", "preference"):
+                    text_val = h.value.get("text") or h.descriptor
+                    print(f"{_indent()}{h.kind}: \"{text_val[:120]}\"")
 
             # ── perception ────────────────────────────────────────────────────
             obs = perception.observe(query, hits, history, prior_goals, run_id)

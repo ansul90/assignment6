@@ -52,7 +52,11 @@ def _decompose(query: str, hits: list[MemoryItem]) -> list[Goal]:
         "   - If the query involves fetching a URL or web page, that fetch is its OWN goal.\n"
         "   - Extracting or synthesising information from that page is a SEPARATE subsequent goal.\n"
         "2. Never merge a fetch/search step with an extraction/answer step into one goal.\n"
-        "3. Keep goals minimal — do not create more goals than the query requires.\n\n"
+        "3. Keep goals minimal — do not create more goals than the query requires.\n"
+        "4. If the memory hits already contain the answer, decompose into a SINGLE goal: "
+        "   'Answer <the query>' — do not add extra goals for steps that are already satisfied by memory.\n"
+        "5. A simple recall question (e.g. 'When is X?', 'What is Y?') that is fully answered by a memory "
+        "   hit must produce exactly ONE goal.\n\n"
         "Return the goals as a JSON object matching the schema."
     )
 
@@ -113,8 +117,8 @@ def _is_satisfied(goal: Goal, history: list[HistoryEntry]) -> bool:
     if not goal_history:
         return False
 
-    # Heuristic: if any entry is a real (non-error) answer, it is done
-    ERROR_PREFIXES = ("[Decision error]", "[ERROR]", "[Error")
+    # Heuristic: if any entry is a real (non-error, non-skip) answer, it is done
+    ERROR_PREFIXES = ("[Decision error]", "[ERROR]", "[Error", "[SKIP]")
     if any(
         h.kind == "answer"
         and h.text

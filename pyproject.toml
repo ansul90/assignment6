@@ -14,7 +14,7 @@ dependencies = [
     "python-dotenv>=1.0",
     # Web search tools (mcp_server)
     "tavily-python>=0.3",
-    "duckduckgo-search>=6.0",   # exposes duckduckgo_search.DDGS
+    "ddgs>=0.6", # renamed from duckduckgo-search; exposes ddgs.DDGS
     # URL fetch via headless Chromium (mcp_server fetch_url)
     "crawl4ai>=0.4",
 ]

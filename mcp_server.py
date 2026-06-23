@@ -23,7 +23,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 import httpx
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
@@ -248,12 +248,11 @@ def list_dir(path: str = ".") -> list[dict]:
 
 @mcp.tool()
 def create_file(path: str, content: str) -> dict:
-    """Create a new file in the sandbox; errors if it exists. Example: create_file("hello.txt", "hi")."""
+    """Create a new file in the sandbox (parent dirs are created automatically); errors if the file already exists. Example: create_file("reminders/birthday.txt", "Mom's birthday: 15 May 2026")."""
     p = _safe(path)
     if p.exists():
         raise ValueError(f"File '{path}' already exists")
-    if not p.parent.exists():
-        raise ValueError(f"Parent directory of '{path}' does not exist")
+    p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(content, encoding="utf-8")
     return {"ok": True, "path": path, "size_bytes": p.stat().st_size}
 

@@ -48,8 +48,28 @@ def _build_system() -> str:
         "- If you need information from the web, a file, a URL, or a calculation, call the appropriate tool.\n"
         "- You can only call EXACTLY ONE tool at a time.\n"
         "- If you already have all the information needed to answer the goal directly, return an inline answer — do NOT call a tool.\n"
-        "- Do NOT guess or fabricate information. Do NOT pass artifact handles (art:...) as path or url arguments.\n"
-        "- Always prefer accuracy and completeness."
+        "- ATTACHED ARTIFACTS contain the actual fetched content already embedded in this prompt. "
+        "Read from them directly and return an inline answer. NEVER call fetch_url, read_file, or any "
+        "other tool just to re-read content that is already present in ATTACHED ARTIFACTS.\n"
+        "- NEVER pass artifact handles (art:xxxx) as arguments to any tool. They are not file paths or URLs.\n"
+        "- Always prefer accuracy and completeness.\n\n"
+        "REMINDER / CALENDAR TASKS:\n"
+        "- There is NO calendar integration. When asked to 'create a reminder', 'set a reminder', or "
+        "'add a calendar event', ALWAYS use the create_file tool to write a plain-text .txt file.\n"
+        "- Use the path format: <descriptive_name>.txt  (file goes directly in the sandbox root, no subdirectory)\n"
+        "- The file content must contain ONLY the key fact and the reminder dates — keep it brief.\n"
+        "  Example content for a birthday reminder:\n"
+        "    Mom's birthday: 15 May 2026\n"
+        "    Reminder (2 weeks before): 1 May 2026\n"
+        "- Do NOT apologise for lacking a calendar tool. Just write the file.\n\n"
+        "RECALL / LOOKUP TASKS:\n"
+        "- When the goal is to answer a question about a previously stored fact (e.g. 'When is X?', "
+        "'What date is Y?'), prefer reading from the sandbox file over relying on memory alone.\n"
+        "- Step 1: call list_dir({\"path\": \".\"}) to see what files exist in the sandbox.\n"
+        "- Step 2: if a relevant file is listed (e.g. a .txt file whose name matches the topic), "
+        "call read_file({\"path\": \"<filename>\"}) to retrieve its content.\n"
+        "- Step 3: answer from the file content.\n"
+        "- Only skip to an inline answer if no relevant file is found after listing the directory."
     )
 
 
@@ -82,7 +102,7 @@ def _build_user_message(
     # body. Skipping the first 2000 chars and taking the next 10000 ensures the LLM
     # sees actual article content rather than sidebar/menu boilerplate.
     ARTIFACT_SKIP = 2000
-    ARTIFACT_WINDOW = 10000
+    ARTIFACT_WINDOW = 15000
     prompt += "ATTACHED ARTIFACTS:\n"
     if attached:
         for art_id, data in attached:
