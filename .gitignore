@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+*.egg-info/
+
+# Environment / secrets
+.env
+*.env
+
+# Runtime state
+state/memory.json
+usage.json
+llm_gatewayV3/*.db
+
+# Dependencies lockfile (optional — remove if you want to pin deps)
+uv.lock
+
+# IDE
+.cursor/
+.vscode/
