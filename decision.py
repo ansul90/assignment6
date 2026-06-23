@@ -4,7 +4,7 @@ decision.py — Decision module for EAGV3 Week 6.
 Responsibilities:
 1. Receive Goal, memory hits, attached artifacts, history, and available tools.
 2. Build system prompt and user message context.
-3. Call LLM gateway with native tool-use and auto_route="decision".
+3. Call LLM gateway with native tool-use, following LLM_ORDER for provider selection.
 4. Return DecisionOutput (typed Pydantic contract from schemas.py).
 
 All inputs and outputs use typed Pydantic contracts from schemas.py.
@@ -156,7 +156,6 @@ def next_step(
             system=_build_system(),
             tools=gateway_tools,
             tool_choice="auto",
-            auto_route="decision",
             temperature=0.0,
         )
 
